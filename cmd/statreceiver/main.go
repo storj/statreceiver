@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
+	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"github.com/zeebo/errs"
 
