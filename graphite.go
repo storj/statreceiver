@@ -5,6 +5,7 @@ package statreceiver
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -29,7 +30,7 @@ type GraphiteDest struct {
 // constructor will start that process. Use Close to stop it.
 func NewGraphiteDest(address string) *GraphiteDest {
 	rv := &GraphiteDest{address: address}
-	go rv.flush()
+	go rv.run()
 	return rv
 }
 
@@ -38,29 +39,61 @@ func (d *GraphiteDest) Metric(application, instance string, key []byte, val floa
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
+	if d.stopped {
+		return errors.New("graphite dest is stopped, cannot add metric")
+	}
+
 	if d.conn == nil {
-		conn, err := net.Dial("tcp", d.address)
+		err := d.establishConnection()
 		if err != nil {
 			return err
 		}
-		// TODO(leak): free connection
-		d.conn = conn
-		d.buf = bufio.NewWriter(conn)
 	}
-
 	_, err := fmt.Fprintf(d.buf, "%s.%s.%s %v %d\n", application, instance, string(key), val, ts.Unix())
+	if err != nil {
+		log.Printf("err writing to buffer, re-establishing connection. err: %v", err)
+		err = d.establishConnection()
+		if err != nil {
+			return err
+		}
+		// Try one more time, now that we've reestablished connection.
+		_, err = fmt.Fprintf(d.buf, "%s.%s.%s %v %d\n", application, instance, string(key), val, ts.Unix())
+	}
 	return err
 }
 
-// Close stops the flushing goroutine
-func (d *GraphiteDest) Close() error {
-	d.mu.Lock()
-	d.stopped = true
-	d.mu.Unlock()
+// establishConnection dials the address and prepares a buffer for writing.
+// Only call while holding the mutex lock.
+func (d *GraphiteDest) establishConnection() error {
+	if d.conn != nil {
+		err := d.conn.Close()
+		if err != nil {
+			log.Printf("failed closing old conn: %v", err)
+		}
+	}
+	conn, err := net.Dial("tcp", d.address)
+	if err != nil {
+		d.conn = nil
+		return err
+	}
+	d.conn = conn
+	d.buf = bufio.NewWriter(conn)
 	return nil
 }
 
-func (d *GraphiteDest) flush() {
+// Close stops the flushing goroutine
+func (d *GraphiteDest) Close() (err error) {
+	d.mu.Lock()
+	d.stopped = true
+	if d.conn != nil {
+		err = d.conn.Close()
+	}
+	d.mu.Unlock()
+	return err
+}
+
+// run periodically flushes the buffer to the underlying conn
+func (d *GraphiteDest) run() {
 	for {
 		time.Sleep(5 * time.Second)
 		d.mu.Lock()
@@ -77,4 +110,19 @@ func (d *GraphiteDest) flush() {
 			log.Printf("failed flushing: %v", err)
 		}
 	}
+}
+
+// Flush manually flushes the buffer to the underlying writer.
+func (d *GraphiteDest) Flush() error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return d.buf.Flush()
+}
+
+// TestCloseConn is used for tests only, and allows you to manually close the
+// underlying connection to trigger failure states.
+func (d *GraphiteDest) TestCloseConn() error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return d.conn.Close()
 }
