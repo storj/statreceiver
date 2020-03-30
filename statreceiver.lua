@@ -59,7 +59,7 @@ metric_parser =
     --packetfilter(".*", "", udpout("localhost:9002")))
     --packetfilter("(storagenode|satellite)-(dev|prod|alphastorj|stagingstorj)", ""))
 
-af = "(satellite|downloadData|uploadData).*(-alpha|-release|storj|-transfersh)"
+af = "(satellite|retrievability-checker|downloadData|uploadData).*(-alpha|-release|storj|-transfersh)"
 af_rothko = ".*(-alpha|-release|storj|-transfersh)"
 uplink_header_matcher = headermultivalmatcher("sat",
     "12EayRS2V1kEsWESU9QMRseFhdxYxKicsiFmxrsLZHeLUtdps3S@us-central-1.tardigrade.io:7777",
