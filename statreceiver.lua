@@ -28,10 +28,7 @@ pbufsize = 1000
 --  * print() goes to stdout
 --  * db("sqlite3", path) goes to sqlite
 --  * db("postgres", connstring) goes to postgres
-   influx_out_old = graphite("influx-internal.datasci.storj.io.:2003")
-   influx_out_v3 = influx("http://influx-internal.datasci.storj.io:8086/write?db=v3_stats_new")
-
-v2_metric_handlers = sanitize(mbufprep(mbuf("influx_old", influx_out_old, mbufsize)))
+influx_out_v3 = influx("http://influx-internal.datasci.storj.io:8086/write?db=v3_stats_new")
 
 --    mbuf(graphite_out_stefan, mbufsize),
   -- send specific storagenode data to the db
@@ -44,18 +41,12 @@ v2_metric_handlers = sanitize(mbufprep(mbuf("influx_old", influx_out_old, mbufsi
 
 
 
-v3_metric_handlers = mbufprep(mcopy(
-    mbuf("downgrade", downgrade(v2_metric_handlers), mbufsize),
-    mbuf("influx_new", influx_out_v3, mbufsize)
-))
+v3_metric_handlers = mbufprep(mbuf("influx_new", influx_out_v3, mbufsize))
 
 -- create a metric parser.
 metric_parser =
-  parse(  -- parse takes one or two arguments. the first argument is
-          -- a metric handler, the remaining one is a per-packet application or
-          -- instance filter. each filter is a regex. all packets must
-          -- match all packet filters.
-    versionsplit(v2_metric_handlers, v3_metric_handlers)) -- sanitize converts weird chars to underscores
+  parse(v3_metric_handlers)
+
     --packetfilter(".*", "", udpout("localhost:9002")))
     --packetfilter("(storagenode|satellite)-(dev|prod|alphastorj|stagingstorj)", ""))
 
