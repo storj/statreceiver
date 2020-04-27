@@ -1,0 +1,11 @@
+[Unit]
+Description=Statreceiver
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/statreceiver --input /etc/storj/statreceiver.lua
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

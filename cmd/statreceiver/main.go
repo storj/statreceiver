@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/BurntSushi/toml"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
@@ -25,8 +24,7 @@ import (
 
 // Config is the set of configuration values we care about
 var Config struct {
-	Input            string `default:"" help:"path to configuration file"`
-	DowngradeMetrics string `default:"" help:"path to downgrade metrics toml file"`
+	Input string `default:"" help:"path to configuration file"`
 }
 
 func main() {
@@ -65,15 +63,6 @@ func Main(cmd *cobra.Command, args []string) error {
 		input = inputFile
 	}
 
-	if Config.DowngradeMetrics == "" {
-		return fmt.Errorf("--downgrade-metrics toml path required")
-	}
-
-	var knownMetrics map[string]string
-	if _, err := toml.DecodeFile(Config.DowngradeMetrics, &knownMetrics); err != nil {
-		return fmt.Errorf("failed to decode toml file: %s", err)
-	}
-
 	scope := luacfg.NewScope()
 	err := errs.Combine(
 		scope.RegisterVal("deliver", statreceiver.Deliver),
@@ -99,7 +88,6 @@ func Main(cmd *cobra.Command, args []string) error {
 		scope.RegisterVal("db", statreceiver.NewDBDest),
 		scope.RegisterVal("pbufprep", statreceiver.NewPacketBufPrep),
 		scope.RegisterVal("mbufprep", statreceiver.NewMetricBufPrep),
-		scope.RegisterVal("downgrade", statreceiver.NewMetricDowngrade(knownMetrics)),
 		scope.RegisterVal("versionsplit", statreceiver.NewVersionSplit),
 	)
 	if err != nil {
@@ -110,6 +98,8 @@ func Main(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	log.Printf("Started")
 
 	select {}
 }

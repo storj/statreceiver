@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/zeebo/admission/v2/admproto"
+	"github.com/zeebo/admission/v3/admproto"
 
 	"storj.io/common/memory"
 )
@@ -43,7 +43,7 @@ func (p *Parser) Packet(data []byte, ts time.Time) (err error) {
 	defer p.scratch.Put(scratch)
 
 	r := admproto.NewReaderWith((*scratch)[:])
-	data, appb, instb, err := r.Begin(data)
+	data, appb, instb, _, err := r.Begin(data)
 	if err != nil {
 		return err
 	}
