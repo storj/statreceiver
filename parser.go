@@ -43,9 +43,18 @@ func (p *Parser) Packet(data []byte, ts time.Time) (err error) {
 	defer p.scratch.Put(scratch)
 
 	r := admproto.NewReaderWith((*scratch)[:])
-	data, appb, instb, _, err := r.Begin(data)
+	data, appb, instb, numHeaders, err := r.Begin(data)
 	if err != nil {
 		return err
+	}
+
+	// Even though we don't use the headers, if they exist on the buffer we
+	// need to read them off.
+	for i := 0; i < numHeaders; i++ {
+		data, _, _, err = r.NextHeader(data)
+		if err != nil {
+			return err
+		}
 	}
 
 	app, inst := string(appb), string(instb)
