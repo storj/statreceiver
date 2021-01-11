@@ -22,7 +22,7 @@ func NewPacketCopier(dest ...PacketDest) *PacketCopier {
 	return &PacketCopier{dest: dest}
 }
 
-// Packet implements the PacketDest interface
+// Packet implements the PacketDest interface.
 func (p *PacketCopier) Packet(data []byte, ts time.Time) (ferr error) {
 	var errlist errs.Group
 	for _, dest := range p.dest {
