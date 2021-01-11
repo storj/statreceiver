@@ -9,17 +9,17 @@ import (
 	"time"
 )
 
-// Printer is a MetricDest that writes to stdout
+// Printer is a MetricDest that writes to stdout.
 type Printer struct {
 	mu sync.Mutex
 }
 
-// NewPrinter creates a Printer
+// NewPrinter creates a Printer.
 func NewPrinter() *Printer {
 	return &Printer{}
 }
 
-// Metric implements MetricDest
+// Metric implements MetricDest.
 func (p *Printer) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -28,17 +28,17 @@ func (p *Printer) Metric(application, instance string, key []byte, val float64, 
 	return err
 }
 
-// PacketPrinter is a PacketDest that writes to stdout
+// PacketPrinter is a PacketDest that writes to stdout.
 type PacketPrinter struct {
 	mu sync.Mutex
 }
 
-// NewPacketPrinter returns a PacketPrinter
+// NewPacketPrinter returns a PacketPrinter.
 func NewPacketPrinter() *PacketPrinter {
 	return &PacketPrinter{}
 }
 
-// Packet implements PacketDest
+// Packet implements PacketDest.
 func (p *PacketPrinter) Packet(data []byte, ts time.Time) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()

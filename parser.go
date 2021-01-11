@@ -13,7 +13,7 @@ import (
 	"storj.io/common/memory"
 )
 
-// Parser is a PacketDest that sends data to a MetricDest
+// Parser is a PacketDest that sends data to a MetricDest.
 type Parser struct {
 	dest    MetricDest
 	scratch sync.Pool
@@ -32,7 +32,7 @@ func NewParser(dest MetricDest) *Parser {
 	}
 }
 
-// Packet implements PacketDest
+// Packet implements PacketDest.
 func (p *Parser) Packet(data []byte, ts time.Time) (err error) {
 	data, err = admproto.CheckChecksum(data)
 	if err != nil {

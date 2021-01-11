@@ -19,17 +19,17 @@ type Sanitizer struct {
 // NewSanitizer creates a Sanitizer that sends sanitized metrics to dest.
 func NewSanitizer(dest MetricDest) *Sanitizer { return &Sanitizer{dest: dest} }
 
-// Metric implements MetricDest
+// Metric implements MetricDest.
 func (s *Sanitizer) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	return s.dest.Metric(sanitize(application), sanitize(instance), sanitizeb(key), val, ts)
 }
 
 func sanitize(val string) string {
-	return strings.Replace(strings.Map(safechar, val), "..", ".", -1)
+	return strings.ReplaceAll(strings.Map(safechar, val), "..", ".")
 }
 
 func sanitizeb(val []byte) []byte {
-	return bytes.Replace(bytes.Map(safechar, val), []byte(".."), []byte("."), -1)
+	return bytes.ReplaceAll(bytes.Map(safechar, val), []byte(".."), []byte("."))
 }
 
 func safechar(r rune) rune {
