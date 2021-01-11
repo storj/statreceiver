@@ -57,7 +57,7 @@ func (scope *Scope) register(name string, val interface{}, pusher func(l *lua.St
 	return nil
 }
 
-// Run runs the Lua source represented by in
+// Run runs the Lua source represented by the reader called in.
 func (scope *Scope) Run(in io.Reader) error {
 	l := lua.NewState()
 	lua.OpenLibraries(l)

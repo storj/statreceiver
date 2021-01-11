@@ -11,18 +11,18 @@ import (
 	"github.com/zeebo/errs"
 )
 
-// PacketCopier sends the same packet to multiple destinations
+// PacketCopier sends the same packet to multiple destinations.
 type PacketCopier struct {
 	dest []PacketDest
 }
 
 // NewPacketCopier creates a packet copier that sends the same packets to
-// the provided different destinations
+// the provided different destinations.
 func NewPacketCopier(dest ...PacketDest) *PacketCopier {
 	return &PacketCopier{dest: dest}
 }
 
-// Packet implements the PacketDest interface
+// Packet implements the PacketDest interface.
 func (p *PacketCopier) Packet(data []byte, ts time.Time) (ferr error) {
 	var errlist errs.Group
 	for _, dest := range p.dest {
@@ -31,18 +31,18 @@ func (p *PacketCopier) Packet(data []byte, ts time.Time) (ferr error) {
 	return errlist.Err()
 }
 
-// MetricCopier sends the same metric to multiple destinations
+// MetricCopier sends the same metric to multiple destinations.
 type MetricCopier struct {
 	dest []MetricDest
 }
 
 // NewMetricCopier creates a metric copier that sends the same metrics to
-// the provided different destinations
+// the provided different destinations.
 func NewMetricCopier(dest ...MetricDest) *MetricCopier {
 	return &MetricCopier{dest: dest}
 }
 
-// Metric implements the MetricDest interface
+// Metric implements the MetricDest interface.
 func (m *MetricCopier) Metric(application, instance string,
 	key []byte, val float64, ts time.Time) (ferr error) {
 	var errlist errs.Group
@@ -52,7 +52,7 @@ func (m *MetricCopier) Metric(application, instance string,
 	return errlist.Err()
 }
 
-// Packet represents a single packet
+// Packet represents a single packet.
 type Packet struct {
 	Data []byte
 	TS   time.Time
@@ -65,7 +65,7 @@ type PacketBuffer struct {
 	ch chan Packet
 }
 
-// NewPacketBuffer makes a packet buffer with a buffer size of bufsize
+// NewPacketBuffer makes a packet buffer with a buffer size of bufsize.
 func NewPacketBuffer(p PacketDest, bufsize int) *PacketBuffer {
 	ch := make(chan Packet, bufsize)
 	go func() {
@@ -79,7 +79,7 @@ func NewPacketBuffer(p PacketDest, bufsize int) *PacketBuffer {
 	return &PacketBuffer{ch: ch}
 }
 
-// Packet implements the PacketDest interface
+// Packet implements the PacketDest interface.
 func (p *PacketBuffer) Packet(data []byte, ts time.Time) error {
 	select {
 	case p.ch <- Packet{Data: data, TS: ts}:
@@ -89,7 +89,7 @@ func (p *PacketBuffer) Packet(data []byte, ts time.Time) error {
 	}
 }
 
-// Metric represents a single metric
+// Metric represents a single metric.
 type Metric struct {
 	Application string
 	Instance    string
@@ -106,7 +106,7 @@ type MetricBuffer struct {
 	ch   chan Metric
 }
 
-// NewMetricBuffer makes a metric buffer with a buffer size of bufsize
+// NewMetricBuffer makes a metric buffer with a buffer size of bufsize.
 func NewMetricBuffer(name string, p MetricDest, bufsize int) *MetricBuffer {
 	ch := make(chan Metric, bufsize)
 	go func() {
@@ -123,7 +123,7 @@ func NewMetricBuffer(name string, p MetricDest, bufsize int) *MetricBuffer {
 	}
 }
 
-// Metric implements the MetricDest interface
+// Metric implements the MetricDest interface.
 func (p *MetricBuffer) Metric(application, instance string, key []byte,
 	val float64, ts time.Time) error {
 	select {
@@ -142,17 +142,17 @@ func (p *MetricBuffer) Metric(application, instance string, key []byte,
 // PacketBufPrep prepares a packet destination for a packet buffer.
 // By default, packet memory is reused, which would cause data race conditions
 // when a buffer is also used. PacketBufPrep copies the memory to make sure
-// there are no data races
+// there are no data races.
 type PacketBufPrep struct {
 	dest PacketDest
 }
 
-// NewPacketBufPrep creates a PacketBufPrep
+// NewPacketBufPrep creates a PacketBufPrep.
 func NewPacketBufPrep(dest PacketDest) *PacketBufPrep {
 	return &PacketBufPrep{dest: dest}
 }
 
-// Packet implements the PacketDest interface
+// Packet implements the PacketDest interface.
 func (p *PacketBufPrep) Packet(data []byte, ts time.Time) error {
 	return p.dest.Packet(append([]byte(nil), data...), ts)
 }
@@ -160,17 +160,17 @@ func (p *PacketBufPrep) Packet(data []byte, ts time.Time) error {
 // MetricBufPrep prepares a metric destination for a metric buffer.
 // By default, metric key memory is reused, which would cause data race
 // conditions when a buffer is also used. MetricBufPrep copies the memory to
-// make sure there are no data races
+// make sure there are no data races.
 type MetricBufPrep struct {
 	dest MetricDest
 }
 
-// NewMetricBufPrep creates a MetricBufPrep
+// NewMetricBufPrep creates a MetricBufPrep.
 func NewMetricBufPrep(dest MetricDest) *MetricBufPrep {
 	return &MetricBufPrep{dest: dest}
 }
 
-// Metric implements the MetricDest interface
+// Metric implements the MetricDest interface.
 func (p *MetricBufPrep) Metric(application, instance string, key []byte,
 	val float64, ts time.Time) error {
 	return p.dest.Metric(application, instance, append([]byte(nil), key...), val, ts)

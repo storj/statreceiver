@@ -32,7 +32,7 @@ func NewMetricDowngrade(knownMetrics map[string]string) func(dest MetricDest) *M
 	}
 }
 
-// Metric implements MetricDest
+// Metric implements MetricDest.
 func (k *MetricDowngrade) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	comma := bytes.IndexByte(key, ',')
 	if comma < 0 {

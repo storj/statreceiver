@@ -47,7 +47,7 @@ func NewInfluxDest(writeURL string) *InfluxDest {
 	return rv
 }
 
-// Metric implements MetricDest
+// Metric implements MetricDest.
 func (d *InfluxDest) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -72,7 +72,7 @@ keyRange:
 		newKey = append(newKey, ",application="...)
 		newKey = appendTag(newKey, application)
 
-		// Only add instanceID if it's a satellite or retrievability-checker
+		// Only add instanceID if it's a satellite or retrievability-checker.
 		if strings.Contains(application, "satellite") || strings.Contains(application, "retrievability") {
 			newKey = append(newKey, ",instance="...)
 			newKey = appendTag(newKey, instance)

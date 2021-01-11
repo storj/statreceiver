@@ -14,7 +14,7 @@ import (
 )
 
 // GraphiteDest is a MetricDest that sends data with the Graphite TCP wire
-// protocol
+// protocol.
 type GraphiteDest struct {
 	address string
 
@@ -34,7 +34,7 @@ func NewGraphiteDest(address string) *GraphiteDest {
 	return rv
 }
 
-// Metric implements MetricDest
+// Metric implements MetricDest.
 func (d *GraphiteDest) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -81,7 +81,7 @@ func (d *GraphiteDest) establishConnection() error {
 	return nil
 }
 
-// Close stops the flushing goroutine
+// Close stops the flushing goroutine.
 func (d *GraphiteDest) Close() (err error) {
 	d.mu.Lock()
 	d.stopped = true
@@ -92,7 +92,7 @@ func (d *GraphiteDest) Close() (err error) {
 	return err
 }
 
-// run periodically flushes the buffer to the underlying conn
+// run periodically flushes the buffer to the underlying conn.
 func (d *GraphiteDest) run() {
 	for {
 		time.Sleep(5 * time.Second)

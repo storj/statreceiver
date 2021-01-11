@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// FileSource reads packets from a file
+// FileSource reads packets from a file.
 type FileSource struct {
 	path string
 
@@ -20,12 +20,12 @@ type FileSource struct {
 	decoder *gob.Decoder
 }
 
-// NewFileSource creates a FileSource
+// NewFileSource creates a FileSource.
 func NewFileSource(path string) *FileSource {
 	return &FileSource{path: path}
 }
 
-// Next implements the Source interface
+// Next implements the Source interface.
 func (f *FileSource) Next() ([]byte, time.Time, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -55,12 +55,12 @@ type FileDest struct {
 	encoder *gob.Encoder
 }
 
-// NewFileDest creates a FileDest
+// NewFileDest creates a FileDest.
 func NewFileDest(path string) *FileDest {
 	return &FileDest{path: path}
 }
 
-// Packet implements PacketDest
+// Packet implements PacketDest.
 func (f *FileDest) Packet(data []byte, ts time.Time) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()

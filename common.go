@@ -40,17 +40,17 @@ func Deliver(source Source, dest PacketDest) io.Closer {
 	})
 }
 
-// Source reads incoming packets
+// Source reads incoming packets.
 type Source interface {
 	Next() (data []byte, ts time.Time, err error)
 }
 
-// PacketDest handles packets
+// PacketDest handles packets.
 type PacketDest interface {
 	Packet(data []byte, ts time.Time) error
 }
 
-// MetricDest handles metrics
+// MetricDest handles metrics.
 type MetricDest interface {
 	Metric(application, instance string, key []byte, val float64, ts time.Time) error
 }

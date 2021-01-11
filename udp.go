@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// UDPSource is a packet source
+// UDPSource is a packet source.
 type UDPSource struct {
 	address string
 
@@ -20,12 +20,12 @@ type UDPSource struct {
 	closed bool
 }
 
-// NewUDPSource creates a UDPSource that listens on address
+// NewUDPSource creates a UDPSource that listens on address.
 func NewUDPSource(address string) *UDPSource {
 	return &UDPSource{address: address}
 }
 
-// Next implements the Source interface
+// Next implements the Source interface.
 func (s *UDPSource) Next() ([]byte, time.Time, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -52,7 +52,7 @@ func (s *UDPSource) Next() ([]byte, time.Time, error) {
 	return s.buf[:n], time.Now(), nil
 }
 
-// Close closes the source
+// Close closes the source.
 func (s *UDPSource) Close() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -79,7 +79,7 @@ func NewUDPDest(address string) *UDPDest {
 	return &UDPDest{address: address}
 }
 
-// Packet implements PacketDest
+// Packet implements PacketDest.
 func (d *UDPDest) Packet(data []byte, ts time.Time) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -105,7 +105,7 @@ func (d *UDPDest) Packet(data []byte, ts time.Time) error {
 	return err
 }
 
-// Close closes the destination
+// Close closes the destination.
 func (d *UDPDest) Close() error {
 	d.mu.Lock()
 	defer d.mu.Unlock()

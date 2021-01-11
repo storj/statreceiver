@@ -31,7 +31,7 @@ type DBDest struct {
 	db *sql.DB
 }
 
-// NewDBDest creates a DBDest
+// NewDBDest creates a DBDest.
 func NewDBDest(driver, address string) *DBDest {
 	if _, found := sqlupsert[driver]; !found {
 		panic(fmt.Sprintf("driver %s not supported", driver))
@@ -42,7 +42,7 @@ func NewDBDest(driver, address string) *DBDest {
 	}
 }
 
-// Metric implements the MetricDest interface
+// Metric implements the MetricDest interface.
 func (db *DBDest) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	db.mu.Lock()
 	if db.db == nil {
