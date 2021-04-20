@@ -73,7 +73,7 @@ keyRange:
 		newKey = appendTag(newKey, application)
 
 		// Only add instanceID if it's a satellite or retrievability-checker.
-		if strings.Contains(application, "satellite") || strings.Contains(application, "retrievability") || strings.Contains(application, "webproxy") {
+		if strings.Contains(application, "satellite") || strings.Contains(application, "retrievability") {
 			newKey = append(newKey, ",instance="...)
 			newKey = appendTag(newKey, instance)
 		}
