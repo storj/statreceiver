@@ -33,7 +33,9 @@ metric_handlers = mcopy(
 
 -- create a metric parser.
 metric_parser =
-  parse(sanitize(metric_handlers)) -- sanitize converts weird chars to underscores
+  -- sanitize converts weird chars to underscores (graphite protocol)
+  -- If you need to sanitize influx data, use influxsanitizer
+  parse(sanitize(metric_handlers))
 
 -- pcopy forks data to multiple outputs
 -- output types include parse, fileout, packetfilter, and udpout

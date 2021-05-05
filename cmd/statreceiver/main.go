@@ -83,6 +83,7 @@ func Main(cmd *cobra.Command, args []string) error {
 		scope.RegisterVal("instfilter", statreceiver.NewInstanceFilter),
 		scope.RegisterVal("keyfilter", statreceiver.NewKeyFilter),
 		scope.RegisterVal("sanitize", statreceiver.NewSanitizer),
+		scope.RegisterVal("influxsanitizer", statreceiver.NewInfluxSanitizer),
 		scope.RegisterVal("graphite", statreceiver.NewGraphiteDest),
 		scope.RegisterVal("influx", statreceiver.NewInfluxDest),
 		scope.RegisterVal("db", statreceiver.NewDBDest),
