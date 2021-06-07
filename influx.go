@@ -37,7 +37,9 @@ func NewInfluxDest(writeURL string) *InfluxDest {
 		panic(err)
 	}
 	token := parsed.Query().Get("authorization")
-	parsed.Query().Del("authorization")
+	noauth := parsed.Query()
+	noauth.Del("authorization")
+	parsed.RawQuery = noauth.Encode()
 
 	rv := &InfluxDest{
 		url:   parsed.String(),
