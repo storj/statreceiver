@@ -5,6 +5,7 @@ package statreceiver
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -139,7 +140,7 @@ func (d *InfluxDest) flush() {
 		}
 
 		err := func() (err error) {
-			req, err := http.NewRequest("POST", d.url, bytes.NewReader(data))
+			req, err := http.NewRequestWithContext(context.TODO(), "POST", d.url, bytes.NewReader(data))
 			if err != nil {
 				return err
 			}
