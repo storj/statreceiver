@@ -5,6 +5,7 @@ package statreceiver
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -37,7 +38,9 @@ func NewInfluxDest(writeURL string) *InfluxDest {
 		panic(err)
 	}
 	token := parsed.Query().Get("authorization")
-	parsed.Query().Del("authorization")
+	noauth := parsed.Query()
+	noauth.Del("authorization")
+	parsed.RawQuery = noauth.Encode()
 
 	rv := &InfluxDest{
 		url:   parsed.String(),
@@ -137,7 +140,7 @@ func (d *InfluxDest) flush() {
 		}
 
 		err := func() (err error) {
-			req, err := http.NewRequest("POST", d.url, bytes.NewReader(data))
+			req, err := http.NewRequestWithContext(context.TODO(), "POST", d.url, bytes.NewReader(data))
 			if err != nil {
 				return err
 			}
