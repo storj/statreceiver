@@ -160,7 +160,7 @@ func (d *InfluxDest) flush() {
 			return nil
 		}()
 		if err != nil {
-			log.Printf("failed flushing: %v", err)
+			log.Printf("failed flushing %s: %v", d.url, err)
 		}
 	}
 }
