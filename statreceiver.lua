@@ -29,6 +29,7 @@ pbufsize = 1000
 --  * db("sqlite3", path) goes to sqlite
 --  * db("postgres", connstring) goes to postgres
 influx_out_v3 = influx("http://influx-internal.datasci.storj.io:8086/write?db=v3_stats_new")
+influx_out_webproxy = influx("http://influx-internal.datasci.storj.io:8086/write?db=webproxy")
 
 --    mbuf(graphite_out_stefan, mbufsize),
   -- send specific storagenode data to the db
@@ -42,16 +43,19 @@ influx_out_v3 = influx("http://influx-internal.datasci.storj.io:8086/write?db=v3
 
 
 v3_metric_handlers = mbufprep(mbuf("influx_new", influx_out_v3, mbufsize))
+webproxy_metric_handlers = mbufprep(mbuf("influx_webproxy", influx_out_webproxy, mbufsize))
 
 -- create a metric parser.
-metric_parser =
-  parse(v3_metric_handlers)
+metric_parser = parse(v3_metric_handlers)
+webproxy_metric_parser = parse(webproxy_metric_handlers)
 
     --packetfilter(".*", "", udpout("localhost:9002")))
     --packetfilter("(storagenode|satellite)-(dev|prod|alphastorj|stagingstorj)", ""))
 
-af = "(satellite|retrievability-checker|downloadData|uploadData).*(-alpha|-release|storj|-transfersh)"
-af_rothko = ".*(-alpha|-release|storj|-transfersh)"
+af = "(linksharing|gateway-mt|authservice|satellite|retrievability-checker|downloadData|uploadData|webproxy).*(-alpha|-release|storj|-transfersh)"
+af_rothko = "(gateway-mt|authservice|satellite|retrievability-checker|storagenode|uplink).*(-alpha|-release|storj|-transfersh)"
+af_webproxy = "(webproxy).*(-alpha|-release|storj|-transfersh)"
+
 uplink_header_matcher = headermultivalmatcher("sat",
     "12EayRS2V1kEsWESU9QMRseFhdxYxKicsiFmxrsLZHeLUtdps3S@us-central-1.tardigrade.io:7777",
     "12EayRS2V1kEsWESU9QMRseFhdxYxKicsiFmxrsLZHeLUtdps3S@mars.tardigrade.io:7777",
@@ -68,6 +72,9 @@ destination = pbufprep(pcopy(
   --fileout("dump.out"),
   pbuf(packetfilter(af, "", nil, metric_parser), pbufsize),
 
+  -- webproxy
+  pbuf(packetfilter(af_webproxy, "", nil, webproxy_metric_parser), pbufsize),
+
   -- useful local debugging
   pbuf(udpout("localhost:9001"), pbufsize),
 
@@ -80,4 +87,5 @@ destination = pbufprep(pcopy(
 
 -- tie the source to the destination
 deliver(source, destination)
+
 
