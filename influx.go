@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -70,17 +71,12 @@ keyRange:
 			continue
 		}
 
-		var newKey []byte
+		newKey := make([]byte, 0, len(key)+len(application)+len(instance)+len(",application=,instance="))
 		newKey = append(newKey, key[:i]...)
 		newKey = append(newKey, ",application="...)
 		newKey = appendTag(newKey, application)
-
-		// Only add instanceID if it's a satellite or retrievability-checker.
-		if strings.Contains(application, "satellite") || strings.Contains(application, "retrievability") || strings.Contains(application, "webproxy") {
-			newKey = append(newKey, ",instance="...)
-			newKey = appendTag(newKey, instance)
-		}
-
+		newKey = append(newKey, ",instance="...)
+		newKey = appendTag(newKey, instance)
 		newKey = append(newKey, key[i:]...)
 		key = newKey
 
@@ -163,4 +159,39 @@ func (d *InfluxDest) flush() {
 			log.Printf("failed flushing %s: %v", d.url, err)
 		}
 	}
+}
+
+// InstanceZeroer will zero out instance ids given predicates.
+type InstanceZeroer struct {
+	application *regexp.Regexp
+	matchToZero bool
+	dest        MetricDest
+}
+
+// NewInstanceZeroerIf will zero an instance id out if the regex matches.
+func NewInstanceZeroerIf(applicationRegex string, dest MetricDest) *InstanceZeroer {
+	return &InstanceZeroer{
+		application: regexp.MustCompile(applicationRegex),
+		matchToZero: true, // if the regex matches, zero the instance.
+		dest:        dest,
+	}
+}
+
+// NewInstanceZeroerIfNot will zero an instance id out if the regex doesn't match.
+func NewInstanceZeroerIfNot(applicationRegex string, dest MetricDest) *InstanceZeroer {
+	return &InstanceZeroer{
+		application: regexp.MustCompile(applicationRegex),
+		matchToZero: false, // if the regex doesn't match, zero the instance.
+		dest:        dest,
+	}
+}
+
+var _ MetricDest = (*InstanceZeroer)(nil)
+
+// Metric implements MetricDest.
+func (iz *InstanceZeroer) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
+	if iz.application.MatchString(application) == iz.matchToZero {
+		return iz.dest.Metric(application, "", key, val, ts)
+	}
+	return iz.dest.Metric(application, instance, key, val, ts)
 }

@@ -45,8 +45,10 @@ influx_out_webproxy = influx("http://influx-internal.datasci.storj.io:8086/write
 v3_metric_handlers = mbufprep(mbuf("influx_new", influx_out_v3, mbufsize))
 webproxy_metric_handlers = mbufprep(mbuf("influx_webproxy", influx_out_webproxy, mbufsize))
 
+allowed_instance_id_applications = "(satellite|retrievability|webproxy|gateway-mt|linksharing|authservice)"
+
 -- create a metric parser.
-metric_parser = parse(v3_metric_handlers)
+metric_parser = parse(zeroinstanceifnot(allowed_instance_id_applications, v3_metric_handlers))
 webproxy_metric_parser = parse(webproxy_metric_handlers)
 
     --packetfilter(".*", "", udpout("localhost:9002")))
