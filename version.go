@@ -23,6 +23,8 @@ func NewVersionSplit(v2dest, v3dest MetricDest) *VersionSplit {
 	}
 }
 
+var _ MetricDest = (*VersionSplit)(nil)
+
 // Metric implements MetricDest.
 func (k *VersionSplit) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	comma := bytes.IndexByte(key, ',')

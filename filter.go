@@ -41,6 +41,8 @@ func NewPacketFilter(applicationRegex, instanceRegex string, headerMatcher Heade
 	}
 }
 
+var _ PacketDest = (*PacketFilter)(nil)
+
 // Packet passes the packet along to the given destination if the regexes pass.
 func (a *PacketFilter) Packet(data []byte, ts time.Time) error {
 	cdata, err := admproto.CheckChecksum(data)
@@ -131,6 +133,8 @@ func NewKeyFilter(pattern string, dest MetricDest) *KeyFilter {
 	}
 }
 
+var _ MetricDest = (*KeyFilter)(nil)
+
 // Metric implements MetricDest.
 func (k *KeyFilter) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	if k.pattern.Match(key) {
@@ -156,6 +160,8 @@ func NewApplicationFilter(regex string, dest MetricDest) *ApplicationFilter {
 	}
 }
 
+var _ MetricDest = (*ApplicationFilter)(nil)
+
 // Metric implements MetricDest.
 func (k *ApplicationFilter) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	if k.pattern.MatchString(application) {
@@ -180,6 +186,8 @@ func NewInstanceFilter(regex string, dest MetricDest) *InstanceFilter {
 		dest:    dest,
 	}
 }
+
+var _ MetricDest = (*InstanceFilter)(nil)
 
 // Metric implements MetricDest.
 func (k *InstanceFilter) Metric(application, instance string, key []byte, val float64, ts time.Time) error {

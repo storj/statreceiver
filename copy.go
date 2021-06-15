@@ -22,6 +22,8 @@ func NewPacketCopier(dest ...PacketDest) *PacketCopier {
 	return &PacketCopier{dest: dest}
 }
 
+var _ PacketDest = (*PacketCopier)(nil)
+
 // Packet implements the PacketDest interface.
 func (p *PacketCopier) Packet(data []byte, ts time.Time) (ferr error) {
 	var errlist errs.Group
@@ -41,6 +43,8 @@ type MetricCopier struct {
 func NewMetricCopier(dest ...MetricDest) *MetricCopier {
 	return &MetricCopier{dest: dest}
 }
+
+var _ MetricDest = (*MetricCopier)(nil)
 
 // Metric implements the MetricDest interface.
 func (m *MetricCopier) Metric(application, instance string,
@@ -78,6 +82,8 @@ func NewPacketBuffer(p PacketDest, bufsize int) *PacketBuffer {
 	}()
 	return &PacketBuffer{ch: ch}
 }
+
+var _ PacketDest = (*PacketBuffer)(nil)
 
 // Packet implements the PacketDest interface.
 func (p *PacketBuffer) Packet(data []byte, ts time.Time) error {
@@ -123,6 +129,8 @@ func NewMetricBuffer(name string, p MetricDest, bufsize int) *MetricBuffer {
 	}
 }
 
+var _ MetricDest = (*MetricBuffer)(nil)
+
 // Metric implements the MetricDest interface.
 func (p *MetricBuffer) Metric(application, instance string, key []byte,
 	val float64, ts time.Time) error {
@@ -152,6 +160,8 @@ func NewPacketBufPrep(dest PacketDest) *PacketBufPrep {
 	return &PacketBufPrep{dest: dest}
 }
 
+var _ PacketDest = (*PacketBufPrep)(nil)
+
 // Packet implements the PacketDest interface.
 func (p *PacketBufPrep) Packet(data []byte, ts time.Time) error {
 	return p.dest.Packet(append([]byte(nil), data...), ts)
@@ -169,6 +179,8 @@ type MetricBufPrep struct {
 func NewMetricBufPrep(dest MetricDest) *MetricBufPrep {
 	return &MetricBufPrep{dest: dest}
 }
+
+var _ MetricDest = (*MetricBufPrep)(nil)
 
 // Metric implements the MetricDest interface.
 func (p *MetricBufPrep) Metric(application, instance string, key []byte,

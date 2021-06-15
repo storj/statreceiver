@@ -32,6 +32,8 @@ func NewParser(dest MetricDest) *Parser {
 	}
 }
 
+var _ PacketDest = (*Parser)(nil)
+
 // Packet implements PacketDest.
 func (p *Parser) Packet(data []byte, ts time.Time) (err error) {
 	data, err = admproto.CheckChecksum(data)

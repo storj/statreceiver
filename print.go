@@ -19,6 +19,9 @@ func NewPrinter() *Printer {
 	return &Printer{}
 }
 
+var _ MetricDest = (*Printer)(nil)
+var _ PacketDest = (*PacketPrinter)(nil)
+
 // Metric implements MetricDest.
 func (p *Printer) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	p.mu.Lock()

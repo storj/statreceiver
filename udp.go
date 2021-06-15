@@ -25,6 +25,8 @@ func NewUDPSource(address string) *UDPSource {
 	return &UDPSource{address: address}
 }
 
+var _ Source = (*UDPSource)(nil)
+
 // Next implements the Source interface.
 func (s *UDPSource) Next() ([]byte, time.Time, error) {
 	s.mu.Lock()
@@ -78,6 +80,8 @@ type UDPDest struct {
 func NewUDPDest(address string) *UDPDest {
 	return &UDPDest{address: address}
 }
+
+var _ PacketDest = (*UDPDest)(nil)
 
 // Packet implements PacketDest.
 func (d *UDPDest) Packet(data []byte, ts time.Time) error {

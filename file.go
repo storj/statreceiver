@@ -25,6 +25,8 @@ func NewFileSource(path string) *FileSource {
 	return &FileSource{path: path}
 }
 
+var _ Source = (*FileSource)(nil)
+
 // Next implements the Source interface.
 func (f *FileSource) Next() ([]byte, time.Time, error) {
 	f.mu.Lock()
@@ -59,6 +61,8 @@ type FileDest struct {
 func NewFileDest(path string) *FileDest {
 	return &FileDest{path: path}
 }
+
+var _ PacketDest = (*FileDest)(nil)
 
 // Packet implements PacketDest.
 func (f *FileDest) Packet(data []byte, ts time.Time) error {

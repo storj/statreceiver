@@ -51,6 +51,8 @@ func NewInfluxDest(writeURL string) *InfluxDest {
 	return rv
 }
 
+var _ MetricDest = (*InfluxDest)(nil)
+
 // Metric implements MetricDest.
 func (d *InfluxDest) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	d.mu.Lock()

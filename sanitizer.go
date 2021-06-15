@@ -16,6 +16,8 @@ type Sanitizer struct {
 	dest MetricDest
 }
 
+var _ MetricDest = (*Sanitizer)(nil)
+
 // NewSanitizer creates a Sanitizer that sends sanitized metrics to dest.
 func NewSanitizer(dest MetricDest) *Sanitizer { return &Sanitizer{dest: dest} }
 

@@ -58,3 +58,5 @@ func (db *DBDest) Metric(application, instance string, key []byte, val float64, 
 	_, err := db.db.Exec(sqlupsert[db.driver], application+"."+string(key), instance, val, ts.Unix())
 	return err
 }
+
+var _ MetricDest = (*DBDest)(nil)

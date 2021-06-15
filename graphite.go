@@ -34,6 +34,8 @@ func NewGraphiteDest(address string) *GraphiteDest {
 	return rv
 }
 
+var _ MetricDest = (*GraphiteDest)(nil)
+
 // Metric implements MetricDest.
 func (d *GraphiteDest) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
 	d.mu.Lock()
