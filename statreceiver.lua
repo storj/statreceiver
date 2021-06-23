@@ -55,7 +55,7 @@ webproxy_metric_parser = parse(webproxy_metric_handlers)
     --packetfilter("(storagenode|satellite)-(dev|prod|alphastorj|stagingstorj)", ""))
 
 af = "(linksharing|gateway-mt|authservice|satellite|retrievability-checker|downloadData|uploadData|webproxy).*(-alpha|-release|storj|-transfersh)"
-af_rothko = "(gateway-mt|authservice|satellite|retrievability-checker|storagenode|uplink).*(-alpha|-release|storj|-transfersh)"
+af_rothko = "(linksharing|gateway-mt|authservice|satellite|retrievability-checker|storagenode|uplink).*(-alpha|-release|storj|-transfersh)"
 af_webproxy = "(webproxy).*(-alpha|-release|storj|-transfersh)"
 
 uplink_header_matcher = headermultivalmatcher("sat",
