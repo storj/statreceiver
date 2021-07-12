@@ -28,8 +28,16 @@ pbufsize = 1000
 --  * print() goes to stdout
 --  * db("sqlite3", path) goes to sqlite
 --  * db("postgres", connstring) goes to postgres
-influx_out_v3 = influx("http://influx-internal.datasci.storj.io:8086/write?db=v3_stats_new")
-influx_out_webproxy = influx("http://influx-internal.datasci.storj.io:8086/write?db=webproxy")
+
+influx_base = "http://influx-internal.datasci.storj.io:8086"
+influx_user = os.getenv("INFLUX_USERNAME")
+influx_pass = os.getenv("INFLUX_PASSWORD")
+
+v3_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s",influx_base, influx_user, influx_pass)
+webproxy_url = string.format("%s/write?db=webproxy&u=%s&p=%s",influx_base, influx_user, influx_pass)
+
+influx_out_v3 = influx(v3_url)
+influx_out_webproxy = influx(webproxy_url)
 
 --    mbuf(graphite_out_stefan, mbufsize),
   -- send specific storagenode data to the db
