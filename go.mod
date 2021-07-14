@@ -13,6 +13,5 @@ require (
 	github.com/zeebo/errs v1.2.2
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	storj.io/common v0.0.0-20200323134045-2bd4d6e2dd7d
-	storj.io/drpc v0.0.8 // indirect
 	storj.io/private v0.0.0-20200323154727-e555cfbe576d
 )
