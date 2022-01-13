@@ -53,7 +53,7 @@ influx_out_webproxy = influx(webproxy_url)
 v3_metric_handlers = mbufprep(mbuf("influx_new", influx_out_v3, mbufsize))
 webproxy_metric_handlers = mbufprep(mbuf("influx_webproxy", influx_out_webproxy, mbufsize))
 
-allowed_instance_id_applications = "(satellite|retrievability|webproxy|gateway-mt|linksharing|authservice)"
+allowed_instance_id_applications = "(healthcheck|satellite|retrievability|webproxy|gateway-mt|linksharing|authservice)"
 
 -- create a metric parser.
 metric_parser = parse(zeroinstanceifnot(allowed_instance_id_applications, v3_metric_handlers))
@@ -62,7 +62,7 @@ webproxy_metric_parser = parse(webproxy_metric_handlers)
     --packetfilter(".*", "", udpout("localhost:9002")))
     --packetfilter("(storagenode|satellite)-(dev|prod|alphastorj|stagingstorj)", ""))
 
-af = "(linksharing|gateway-mt|authservice|satellite|retrievability-checker|downloadData|uploadData|webproxy).*(-alpha|-release|storj|-transfersh)"
+af = "(linksharing|gateway-mt|authservice|satellite|retrievability-checker|downloadData|uploadData|webproxyi|healthcheck).*(-alpha|-release|storj|-transfersh)"
 af_rothko = "(linksharing|gateway-mt|authservice|satellite|retrievability-checker|storagenode|uplink).*(-alpha|-release|storj|-transfersh)"
 af_webproxy = "(webproxy).*(-alpha|-release|storj|-transfersh)"
 
