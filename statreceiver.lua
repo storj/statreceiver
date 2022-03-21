@@ -33,10 +33,16 @@ influx_base = "http://influx-internal.datasci.storj.io:8086"
 influx_user = os.getenv("INFLUX_USERNAME")
 influx_pass = os.getenv("INFLUX_PASSWORD")
 
+influx_wp_base = "http://influx-wp.datasci.storj.io:8086"
+influx_wp_user = os.getenv("INFLUX_WP_USERNAME")
+influx_wp_pass = os.getenv("INFLUX_WP_PASSWORD")
+
 v3_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s",influx_base, influx_user, influx_pass)
+wp_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s",influx_wp_base, influx_wp_user, influx_wp_pass)
 webproxy_url = string.format("%s/write?db=webproxy&u=%s&p=%s",influx_base, influx_user, influx_pass)
 
 influx_out_v3 = influx(v3_url)
+influx_out_wp = influx(wp_url)
 influx_out_webproxy = influx(webproxy_url)
 
 --    mbuf(graphite_out_stefan, mbufsize),
@@ -51,18 +57,20 @@ influx_out_webproxy = influx(webproxy_url)
 
 
 v3_metric_handlers = mbufprep(mbuf("influx_new", influx_out_v3, mbufsize))
+wp_metric_handlers = mbufprep(mbuf("influx_new", influx_out_wp, mbufsize))
 webproxy_metric_handlers = mbufprep(mbuf("influx_webproxy", influx_out_webproxy, mbufsize))
 
-allowed_instance_id_applications = "(healthcheck|satellite|retrievability|webproxy|gateway-mt|linksharing|authservice)"
+allowed_instance_id_applications = "(orbiter|healthcheck|satellite|retrievability|webproxy|gateway-mt|linksharing|authservice)"
 
 -- create a metric parser.
 metric_parser = parse(zeroinstanceifnot(allowed_instance_id_applications, v3_metric_handlers))
+wp_metric_parser = parse(wp_metric_handlers)
 webproxy_metric_parser = parse(webproxy_metric_handlers)
 
     --packetfilter(".*", "", udpout("localhost:9002")))
     --packetfilter("(storagenode|satellite)-(dev|prod|alphastorj|stagingstorj)", ""))
 
-af = "(linksharing|gateway-mt|authservice|satellite|retrievability-checker|downloadData|uploadData|webproxy|healthcheck).*(-alpha|-release|storj|-transfersh)"
+af = "(orbiter|linksharing|gateway-mt|authservice|satellite|retrievability-checker|downloadData|uploadData|webproxy|healthcheck).*(-alpha|-release|storj|-transfersh)"
 af_rothko = "(linksharing|gateway-mt|authservice|satellite|retrievability-checker|storagenode|uplink).*(-alpha|-release|storj|-transfersh)"
 af_webproxy = "(webproxy).*(-alpha|-release|storj|-transfersh)"
 
@@ -85,6 +93,9 @@ destination = pbufprep(pcopy(
   -- webproxy
   pbuf(packetfilter(af_webproxy, "", nil, webproxy_metric_parser), pbufsize),
 
+  -- webproxy dedicated
+  pbuf(packetfilter(af_webproxy, "", nil, wp_metric_parser), pbufsize),
+
   -- useful local debugging
   pbuf(udpout("localhost:9001"), pbufsize),
 
@@ -97,5 +108,6 @@ destination = pbufprep(pcopy(
 
 -- tie the source to the destination
 deliver(source, destination)
+
 
 
