@@ -37,9 +37,9 @@ influx_wp_base = "http://influx-wp.datasci.storj.io:8086"
 influx_wp_user = os.getenv("INFLUX_WP_USERNAME")
 influx_wp_pass = os.getenv("INFLUX_WP_PASSWORD")
 
-v3_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s",influx_base, influx_user, influx_pass)
-wp_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s",influx_wp_base, influx_wp_user, influx_wp_pass)
-webproxy_url = string.format("%s/write?db=webproxy&u=%s&p=%s",influx_base, influx_user, influx_pass)
+v3_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s", influx_base, influx_user, influx_pass)
+wp_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s", influx_wp_base, influx_wp_user, influx_wp_pass)
+webproxy_url = string.format("%s/write?db=webproxy&u=%s&p=%s", influx_base, influx_user, influx_pass)
 
 influx_out_v3 = influx(v3_url)
 influx_out_wp = influx(wp_url)
@@ -108,6 +108,3 @@ destination = pbufprep(pcopy(
 
 -- tie the source to the destination
 deliver(source, destination)
-
-
-
