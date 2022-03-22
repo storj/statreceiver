@@ -6,7 +6,7 @@ require (
 	github.com/Shopify/go-lua v0.0.0-20191113154418-05ce435a9edd
 	github.com/jtolds/go-luar v0.0.0-20200310225017-6fa637b8208b
 	github.com/lib/pq v1.3.0
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/spf13/cobra v0.0.6
 	github.com/stretchr/testify v1.4.0
 	github.com/zeebo/admission/v3 v3.0.1
