@@ -58,14 +58,14 @@ influx_out_webproxy = influx(webproxy_url)
 
 v3_metric_handlers = mbufprep(mbuf("influx_new", influx_out_v3, mbufsize))
 wp_metric_handlers = mbufprep(mbuf("influx_new", influx_out_wp, mbufsize))
-webproxy_metric_handlers = mbufprep(mbuf("influx_webproxy", influx_out_webproxy, mbufsize))
+-- webproxy_metric_handlers = mbufprep(mbuf("influx_webproxy", influx_out_webproxy, mbufsize))
 
 allowed_instance_id_applications = "(orbiter|healthcheck|satellite|retrievability|webproxy|gateway-mt|linksharing|authservice)"
 
 -- create a metric parser.
 metric_parser = parse(zeroinstanceifnot(allowed_instance_id_applications, v3_metric_handlers))
 wp_metric_parser = parse(wp_metric_handlers)
-webproxy_metric_parser = parse(webproxy_metric_handlers)
+-- webproxy_metric_parser = parse(webproxy_metric_handlers)
 
     --packetfilter(".*", "", udpout("localhost:9002")))
     --packetfilter("(storagenode|satellite)-(dev|prod|alphastorj|stagingstorj)", ""))
@@ -91,7 +91,7 @@ destination = pbufprep(pcopy(
   pbuf(packetfilter(af, "", nil, metric_parser), pbufsize),
 
   -- webproxy
-  pbuf(packetfilter(af_webproxy, "", nil, webproxy_metric_parser), pbufsize),
+  -- pbuf(packetfilter(af_webproxy, "", nil, webproxy_metric_parser), pbufsize),
 
   -- webproxy dedicated
   pbuf(packetfilter(af_webproxy, "", nil, wp_metric_parser), pbufsize),
