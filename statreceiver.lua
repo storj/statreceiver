@@ -43,12 +43,10 @@ influx2_token = os.getenv("INFLUX_2_TOKEN")
 v3_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s",influx_base, influx_user, influx_pass)
 wp_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s",influx_wp_base, influx_wp_user, influx_wp_pass)
 inf2_v3_url = string.format("%s/api/v2/write?bucket=v3_stats_new/autogen&org=storj&authorization=%s",influx2_base,influx2_token)
---webproxy_url = string.format("%s/write?db=webproxy&u=%s&p=%s",influx_base, influx_user, influx_pass)
 
 influx_out_v3 = influx(v3_url)
 influx_out_wp = influx(wp_url)
 influx2_out_v3 = influx(inf2_v3_url)
---influx_out_webproxy = influx(webproxy_url)
 
 --    mbuf(graphite_out_stefan, mbufsize),
   -- send specific storagenode data to the db
@@ -64,7 +62,6 @@ influx2_out_v3 = influx(inf2_v3_url)
 v3_metric_handlers = mbufprep(mbuf("influx_new", influx_out_v3, mbufsize))
 wp_metric_handlers = mbufprep(mbuf("influx_new", influx_out_wp, mbufsize))
 inf2_v3_metric_handlers = mbufprep(mbuf("influx_new", influx2_out_v3, mbufsize))
---webproxy_metric_handlers = mbufprep(mbuf("influx_webproxy", influx_out_webproxy, mbufsize))
 
 allowed_instance_id_applications = "(orbiter|healthcheck|satellite|retrievability|webproxy|gateway-mt|linksharing|authservice)"
 
@@ -72,7 +69,6 @@ allowed_instance_id_applications = "(orbiter|healthcheck|satellite|retrievabilit
 metric_parser = parse(zeroinstanceifnot(allowed_instance_id_applications, v3_metric_handlers))
 inf2_metric_parser = parse(zeroinstanceifnot(allowed_instance_id_applications, inf2_v3_metric_handlers))
 wp_metric_parser = parse(wp_metric_handlers)
----webproxy_metric_parser = parse(webproxy_metric_handlers)
 
     --packetfilter(".*", "", udpout("localhost:9002")))
     --packetfilter("(storagenode|satellite)-(dev|prod|alphastorj|stagingstorj)", ""))
@@ -99,9 +95,6 @@ destination = pbufprep(pcopy(
 
   -- influx2
   pbuf(packetfilter(af, "", nil, inf2_metric_parser), pbufsize),
-
-  -- webproxy
-  --pbuf(packetfilter(af_webproxy, "", nil, webproxy_metric_parser), pbufsize),
 
   -- webproxy dedicated
   pbuf(packetfilter(af_webproxy, "", nil, wp_metric_parser), pbufsize),
