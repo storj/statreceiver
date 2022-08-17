@@ -111,6 +111,3 @@ destination = pbufprep(pcopy(
 
 -- tie the source to the destination
 deliver(source, destination)
-
-
-
