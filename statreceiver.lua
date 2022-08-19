@@ -37,13 +37,16 @@ influx_wp_base = "http://influx-wp.datasci.storj.io:8086"
 influx_wp_user = os.getenv("INFLUX_WP_USERNAME")
 influx_wp_pass = os.getenv("INFLUX_WP_PASSWORD")
 
-v3_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s", influx_base, influx_user, influx_pass)
-wp_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s", influx_wp_base, influx_wp_user, influx_wp_pass)
-webproxy_url = string.format("%s/write?db=webproxy&u=%s&p=%s", influx_base, influx_user, influx_pass)
+influx2_base = "http://influx2.datasci.storj.io:8086"
+influx2_token = os.getenv("INFLUX_2_TOKEN")
+
+v3_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s",influx_base, influx_user, influx_pass)
+wp_url = string.format("%s/write?db=v3_stats_new&u=%s&p=%s",influx_wp_base, influx_wp_user, influx_wp_pass)
+inf2_v3_url = string.format("%s/api/v2/write?bucket=v3_stats_new/autogen&org=storj&authorization=%s",influx2_base,influx2_token)
 
 influx_out_v3 = influx(v3_url)
 influx_out_wp = influx(wp_url)
-influx_out_webproxy = influx(webproxy_url)
+influx2_out_v3 = influx(inf2_v3_url)
 
 --    mbuf(graphite_out_stefan, mbufsize),
   -- send specific storagenode data to the db
@@ -58,21 +61,21 @@ influx_out_webproxy = influx(webproxy_url)
 
 v3_metric_handlers = mbufprep(mbuf("influx_new", influx_out_v3, mbufsize))
 wp_metric_handlers = mbufprep(mbuf("influx_new", influx_out_wp, mbufsize))
--- webproxy_metric_handlers = mbufprep(mbuf("influx_webproxy", influx_out_webproxy, mbufsize))
+inf2_v3_metric_handlers = mbufprep(mbuf("influx_new", influx2_out_v3, mbufsize))
 
 allowed_instance_id_applications = "(orbiter|healthcheck|satellite|retrievability|webproxy|gateway-mt|linksharing|authservice)"
 
 -- create a metric parser.
 metric_parser = parse(zeroinstanceifnot(allowed_instance_id_applications, v3_metric_handlers))
+inf2_metric_parser = parse(zeroinstanceifnot(allowed_instance_id_applications, inf2_v3_metric_handlers))
 wp_metric_parser = parse(wp_metric_handlers)
--- webproxy_metric_parser = parse(webproxy_metric_handlers)
 
     --packetfilter(".*", "", udpout("localhost:9002")))
     --packetfilter("(storagenode|satellite)-(dev|prod|alphastorj|stagingstorj)", ""))
 
-af = "(orbiter|linksharing|gateway-mt|authservice|satellite|retrievability-checker|downloadData|uploadData|webproxy|healthcheck).*(-alpha|-release|storj|-transfersh)"
+af = "(orbiter|linksharing|gateway-mt|authservice|satellite|retrievability-checker|downloadData|uploadData|healthcheck).*(-alpha|-release|storj|-transfersh)"
 af_rothko = "(linksharing|gateway-mt|authservice|satellite|retrievability-checker|storagenode|uplink).*(-alpha|-release|storj|-transfersh)"
-af_webproxy = "(webproxy).*(-alpha|-release|storj|-transfersh)"
+af_webproxy = "(webproxy|healthcheck).*(-alpha|-release|storj|-transfersh)"
 
 uplink_header_matcher = headermultivalmatcher("sat",
     "12EayRS2V1kEsWESU9QMRseFhdxYxKicsiFmxrsLZHeLUtdps3S@us-central-1.tardigrade.io:7777",
@@ -90,8 +93,8 @@ destination = pbufprep(pcopy(
   --fileout("dump.out"),
   pbuf(packetfilter(af, "", nil, metric_parser), pbufsize),
 
-  -- webproxy
-  -- pbuf(packetfilter(af_webproxy, "", nil, webproxy_metric_parser), pbufsize),
+  -- influx2
+  pbuf(packetfilter(af, "", nil, inf2_metric_parser), pbufsize),
 
   -- webproxy dedicated
   pbuf(packetfilter(af_webproxy, "", nil, wp_metric_parser), pbufsize),
