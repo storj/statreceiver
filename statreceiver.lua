@@ -63,7 +63,7 @@ v3_metric_handlers = mbufprep(mbuf("influx_new", influx_out_v3, mbufsize))
 wp_metric_handlers = mbufprep(mbuf("influx_new", influx_out_wp, mbufsize))
 inf2_v3_metric_handlers = mbufprep(mbuf("influx_new", influx2_out_v3, mbufsize))
 
-allowed_instance_id_applications = "(orbiter|healthcheck|satellite|retrievability|webproxy|gateway-mt|linksharing|authservice)"
+allowed_instance_id_applications = "(storjscan|orbiter|healthcheck|satellite|retrievability|webproxy|gateway-mt|linksharing|authservice)"
 
 -- create a metric parser.
 metric_parser = parse(zeroinstanceifnot(allowed_instance_id_applications, v3_metric_handlers))
@@ -73,7 +73,7 @@ wp_metric_parser = parse(wp_metric_handlers)
     --packetfilter(".*", "", udpout("localhost:9002")))
     --packetfilter("(storagenode|satellite)-(dev|prod|alphastorj|stagingstorj)", ""))
 
-af = "(orbiter|linksharing|gateway-mt|authservice|satellite|retrievability-checker|downloadData|uploadData|healthcheck).*(-alpha|-release|storj|-transfersh)"
+af = "(storjscan|orbiter|linksharing|gateway-mt|authservice|satellite|retrievability-checker|downloadData|uploadData|healthcheck).*(-alpha|-release|storj|-transfersh)"
 af_rothko = "(linksharing|gateway-mt|authservice|satellite|retrievability-checker|storagenode|uplink).*(-alpha|-release|storj|-transfersh)"
 af_webproxy = "(webproxy|healthcheck).*(-alpha|-release|storj|-transfersh)"
 
