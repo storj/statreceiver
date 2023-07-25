@@ -103,7 +103,7 @@ destination = pbufprep(pcopy(
   pbuf(udpout("localhost:9001"), pbufsize),
 
   -- rothko
-   pbuf(packetfilter(af_rothko, "", nil, udpout("rothko-internal.datasci.storj.io:9002")), pbufsize)
+   pbuf(packetfilter(af_rothko, "", nil, udpout("rothko-internal.storj.tools:9002")), pbufsize)
 
    -- uplink
    --pbuf(packetfilter("uplink", "", uplink_header_matcher, packetprint()), pbufsize)
