@@ -21,8 +21,9 @@ import (
 // InfluxDest is a MetricDest that sends data with the Influx TCP wire
 // protocol.
 type InfluxDest struct {
-	url   string
-	token string
+	url         string
+	urlRedacted string
+	token       string
 
 	mu      sync.Mutex
 	buf     bytes.Buffer
@@ -43,9 +44,22 @@ func NewInfluxDest(writeURL string) *InfluxDest {
 	noauth.Del("authorization")
 	parsed.RawQuery = noauth.Encode()
 
+	redactedURL, err := url.Parse(parsed.String())
+	if err != nil {
+		panic(err)
+	}
+
+	// If the URL has the user's password in the query, remove it to not leak it when printing/logging
+	// the URL
+	if vals := redactedURL.Query(); vals.Get("p") != "" {
+		vals.Set("p", "REDACTED")
+		redactedURL.RawQuery = vals.Encode()
+	}
+
 	rv := &InfluxDest{
-		url:   parsed.String(),
-		token: token,
+		url:         parsed.String(),
+		urlRedacted: redactedURL.String(),
+		token:       token,
 	}
 	go rv.flush()
 	return rv
@@ -158,7 +172,7 @@ func (d *InfluxDest) flush() {
 			return nil
 		}()
 		if err != nil {
-			log.Printf("failed flushing %s: %v", d.url, err)
+			log.Printf("failed flushing %s: %v", d.urlRedacted, err)
 		}
 	}
 }
