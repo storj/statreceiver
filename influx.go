@@ -152,23 +152,49 @@ func (d *InfluxDest) flush() {
 		}
 
 		err := func() (err error) {
-			req, err := http.NewRequestWithContext(context.TODO(), "POST", d.url, bytes.NewReader(data))
-			if err != nil {
-				return err
-			}
-			if d.token != "" {
-				req.Header.Set("Authorization", "Token "+d.token)
+			const maxReqs = 4
+			baseDelay := 50 * time.Millisecond
+
+			for leftReqs := maxReqs; leftReqs > 0; leftReqs-- {
+				req, err := http.NewRequestWithContext(context.TODO(), "POST", d.url, bytes.NewReader(data))
+				if err != nil {
+					return err
+				}
+				if d.token != "" {
+					req.Header.Set("Authorization", "Token "+d.token)
+				}
+
+				resp, err := http.DefaultClient.Do(req)
+				if err != nil {
+					return err
+				}
+				defer func() { err = errs.Combine(err, resp.Body.Close()) }()
+
+				if status := resp.StatusCode; status != http.StatusNoContent {
+					if status == http.StatusInternalServerError && leftReqs > 1 {
+						iteration := maxReqs - leftReqs
+						delay := baseDelay << iteration
+						log.Printf(
+							"failed flushing %s: invalid status code: 500. Retrying %d/%d after %s",
+							d.urlRedacted,
+							iteration+1,
+							maxReqs-1,
+							delay,
+						)
+						time.Sleep(delay)
+						continue
+					}
+
+					if status == http.StatusRequestEntityTooLarge {
+						return errs.New("invalid status code: %d. Body size: %d bytes", status, len(data))
+					}
+
+					return errs.New("invalid status code: %d", status)
+				}
+
+				break
 			}
 
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				return err
-			}
-			defer func() { err = errs.Combine(err, resp.Body.Close()) }()
-
-			if resp.StatusCode != http.StatusNoContent {
-				return errs.New("invalid status code: %d", resp.StatusCode)
-			}
 			return nil
 		}()
 		if err != nil {
