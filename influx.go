@@ -16,6 +16,8 @@ import (
 	"time"
 
 	"github.com/zeebo/errs"
+
+	"storj.io/common/sync2"
 )
 
 // InfluxDest is a MetricDest that sends data with the Influx TCP wire
@@ -135,8 +137,10 @@ func (d *InfluxDest) Close() error {
 }
 
 func (d *InfluxDest) flush() {
+	ctx := context.TODO()
+
 	for {
-		time.Sleep(5 * time.Second)
+		sync2.Sleep(ctx, 5*time.Second)
 
 		d.mu.Lock()
 		if d.stopped {
@@ -156,7 +160,7 @@ func (d *InfluxDest) flush() {
 			baseDelay := 50 * time.Millisecond
 
 			for leftReqs := maxReqs; leftReqs > 0; leftReqs-- {
-				req, err := http.NewRequestWithContext(context.TODO(), "POST", d.url, bytes.NewReader(data))
+				req, err := http.NewRequestWithContext(ctx, "POST", d.url, bytes.NewReader(data))
 				if err != nil {
 					return err
 				}
@@ -181,7 +185,7 @@ func (d *InfluxDest) flush() {
 							maxReqs-1,
 							delay,
 						)
-						time.Sleep(delay)
+						sync2.Sleep(ctx, delay)
 						continue
 					}
 
