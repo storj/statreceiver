@@ -6,6 +6,7 @@ package statreceiver
 import (
 	"bufio"
 	"encoding/gob"
+	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -53,7 +54,7 @@ type FileDest struct {
 	path string
 
 	mu      sync.Mutex
-	file    io.Closer
+	file    io.WriteCloser
 	encoder *gob.Encoder
 }
 
@@ -79,4 +80,21 @@ func (f *FileDest) Packet(data []byte, ts time.Time) error {
 	}
 
 	return f.encoder.Encode(Packet{Data: data, TS: ts})
+}
+
+// Metric implements MetricDest.
+func (f *FileDest) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	if f.file == nil {
+		file, err := os.Create(f.path)
+		if err != nil {
+			return err
+		}
+		f.file = file
+	}
+
+	_, err := fmt.Fprintf(f.file, "%s %s %s %v\n", application, instance, string(key), val)
+	return err
 }

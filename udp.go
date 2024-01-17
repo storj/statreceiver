@@ -83,7 +83,7 @@ func NewUDPDest(address string) *UDPDest {
 
 var _ PacketDest = (*UDPDest)(nil)
 
-// Packet implements PacketDest.
+// Packet implements PacketDest and MetricDest. Later is only for debugging...
 func (d *UDPDest) Packet(data []byte, ts time.Time) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -108,6 +108,14 @@ func (d *UDPDest) Packet(data []byte, ts time.Time) error {
 	_, err := d.conn.WriteTo(data, d.addr)
 	return err
 }
+
+// Metric implements MetricDest.
+func (d *UDPDest) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
+	out := fmt.Sprintf("%s %s %s %v\n", application, instance, string(key), val)
+	return d.Packet([]byte(out), time.Now())
+}
+
+var _ MetricDest = &UDPDest{}
 
 // Close closes the destination.
 func (d *UDPDest) Close() error {
