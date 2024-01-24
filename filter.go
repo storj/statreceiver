@@ -4,7 +4,10 @@
 package statreceiver
 
 import (
+	"log"
+	"os"
 	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -115,6 +118,43 @@ func (h *HeaderMultiValMatcher) Match(key, val []byte) bool {
 		}
 	}
 	return false
+}
+
+// FilterFile includes metrics based on patters in a file.
+type FilterFile struct {
+	patterns []*regexp.Regexp
+	dest     MetricDest
+}
+
+// NewPatternFile creates a new FilterFile.
+func NewPatternFile(fileName string, dest MetricDest) *FilterFile {
+	pf := &FilterFile{
+		patterns: make([]*regexp.Regexp, 0),
+		dest:     dest,
+	}
+	raw, err := os.ReadFile(fileName)
+	if err != nil {
+		log.Fatalf("Couldn't read file %s: %v", fileName, err)
+	}
+
+	for _, line := range strings.Split(string(raw), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		pf.patterns = append(pf.patterns, regexp.MustCompile(line))
+	}
+	return pf
+}
+
+// Metric implements MetricDest.
+func (k *FilterFile) Metric(application, instance string, key []byte, val float64, ts time.Time) error {
+	for _, p := range k.patterns {
+		if p.Match(key) {
+			return k.dest.Metric(application, instance, key, val, ts)
+		}
+	}
+	return nil
 }
 
 // KeyFilter is a MetricDest that only passes along metrics that pass the key
