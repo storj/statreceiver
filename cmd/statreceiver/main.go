@@ -91,6 +91,7 @@ func Main(cmd *cobra.Command, args []string) error {
 		scope.RegisterVal("versionsplit", statreceiver.NewVersionSplit),
 		scope.RegisterVal("zeroinstanceif", statreceiver.NewInstanceZeroerIf),
 		scope.RegisterVal("zeroinstanceifnot", statreceiver.NewInstanceZeroerIfNot),
+		scope.RegisterVal("eventkit", statreceiver.NewEventkit),
 	)
 	if err != nil {
 		return err
